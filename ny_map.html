@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Plain Leaflet API</title>
+<!--<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' /> position:absolute; top:0; bottom:0; -->
+<script src='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.js"></script>
+
+<style>
+  body { margin:0; padding:0; }
+  #map {  height:600px;}
+</style>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Starter Template for Bootstrap</title>
+
+
+      <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+      <!-- Optional theme -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<div class ="container">
+ <div class="row">
+     <h1 align="center" style= "margin: 40px 0 40px 0"> Services Recommendation</h1>
+ </div>
+<div class="row">
+ <!--       <div class="col-md-12">
+          <h1> Multiple Equal Columns</h1>
+          <div class="row">
+            <div class="col-md-6">
+              <p>Lorem ipsum dolor sit amet, iusto vitae aliquip et nec. Dolorem posidonium te vim. Per ea reque dicam. In omnesque euripidis vis, et cum iudico aliquip, pro in quaeque ceteros pertinax. Docendi facilisi sea ex.</p>
+            </div>
+            <div class="col-md-6">
+              <p>Lorem ipsum dolor sit amet, iusto vitae aliquip et nec. Dolorem posidonium te vim. Per ea reque dicam. In omnesque euripidis vis, et cum iudico aliquip, pro in quaeque ceteros pertinax. Docendi facilisi sea ex.</p>
+            </div>
+          </div>
+        </div>
+        </div>-->
+<div class="row">
+     <div class="col-md-8">
+        <div id='map' style = "margin: 0 0 30px 0"></div>
+     </div>
+    <div class="col-md-4" id="zip_code_serv_rec">
+        <h1> <span id="zip_num"> Zip Code Number </span></h1>
+ 
+    <div id="content">
+        <h2>Business To Recommend</h2>
+    </div>
+    
+
+
+
+
+    
+</div>
+    </div>
+     </div>
+
+
+     <div>
+        <script>
+
+                d3.json("/score?zip_code={{ zip_code }}", function(data){
+                    console.log(data);
+                });
+
+        </script>
+     </div>
+
+ 
+
+</div>
+        
+
+
+<script>
+
+L.mapbox.accessToken = 'pk.eyJ1IjoiYXVkcnljIiwiYSI6IjcxNDhhODA0ZjJlYTU4MTdkNmM2YWFlMDNmZDFlYjIyIn0.JaL2nqR-EAxyuihNRsSiAA';
+// Replace 'mapbox.streets' with your map id.
+var mapboxTiles = L.tileLayer('https://api.mapbox.com/v4/mapbox.light/{z}/{x}/{y}.png?access_token=' + L.mapbox.accessToken, {
+    attribution: '<a href="http://www.mapbox.com/about/maps/" target="_blank">Terms &amp; Feedback</a>'
+});
+
+var zip_code_data;
+
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.busType_perCapita),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+}
+
+function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera) {
+        layer.bringToFront();
+    }
+}
+
+function resetHighlight(e) {
+    geojson.resetStyle(e.target);
+}
+
+function zoomToFeature(e) {
+    console.log(e);
+    map.fitBounds(e.target.getBounds());
+}
+
+var zip_name=67;
+function upd_div_content(zip_name) {
+    $('#zip_num').text(zip_name);
+    console.log('first line');
+    //$.get("/score",{"postal_code":zip_name})
+    //    .done(console.log(data));
+    console.log("finish test");
+    $.get( "/score",{"postal_code":zip_name})
+       .done(function( data ) {
+    var to_display = "";
+    console.log('before for looop');
+    for (var key in data) {
+     console.log('before if statement');
+     if (data.hasOwnProperty(key)) {
+         //to_display += "<p>" + key + ": " + data[key] + "</p>";
+
+
+         to_display += '<button class="btn btn-primary" style = "margin: 0 0 20px 0" type="button" data-toggle="collapse" data-target="#btn_'+key+'" aria-expanded="false" aria-controls="collapseExample">'
+            + key +
+            "</button>"+"<br>"+
+
+        '<div class="collapse" id="btn_'+key+'">'+
+        '<div class="well">'+
+            data[key]+
+            "</div> </div>";
+
+
+
+
+        }
+    }
+    $('#content').html(to_display);
+
+
+    });
+        //$('#content').append(zip_name);
+
+    
+
+}
+function onEachFeature(feature, layer) {
+    var click_wrapper = function(e) {
+        //console.log(feature.properties.postalCode);
+        zip_name = feature.properties.postalCode;
+        console.log("hello");
+        upd_div_content(zip_name)       
+        zoomToFeature(e);
+    }
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: click_wrapper
+    });
+}
+
+
+function getColor(d) {
+    return d > 0.00114617192248588 ? '#800026' :
+           d > 0.000982433076416468 ? '#BD0026' :
+           d > 0.000818694230347057 ? '#E31A1C' :
+           d > 0.000654955384277646 ? '#FC4E2A' :
+           d > 0.000491216538208234  ? '#FD8D3C' :
+           d > 0.000327477692138823  ? '#FEB24C' :
+           d > 0.000163738846069411   ? '#FED976' :
+                      '#FFEDA0';
+}
+
+d3.json("nyc-zip-code-tabulation-areas-polygons.geojson", function(data) {
+    //console.log(data);
+    zip_code_data=data;
+    geojson = L.geoJson(zip_code_data, {
+    style: style,
+    onEachFeature: onEachFeature
+    }).addTo(map);
+
+});
+
+
+
+var map = L.map('map')
+    .addLayer(mapboxTiles)
+    .setView([40.738, -73.919], 11);
+
+
+</script>
+<script>
+
+$('.click').click(function() {
+    // get the contents of the link that was clicked
+    var linkText = $(this).text();
+
+    // replace the contents of the div with the link text
+    $('#zip_code_serv_rec').html();
+
+    // cancel the default action of the link by returning false
+    return false;
+});
+
+</script>
+
+</body>
+</html>
